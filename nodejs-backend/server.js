@@ -7,7 +7,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5176",
+      "http://localhost:3000",
+      "https://narutoinpubg.vercel.app",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // MongoDB connection
@@ -15,11 +26,7 @@ const connectDB = async () => {
   try {
     await mongoose.connect(
       process.env.MONGODB_URI ||
-        "mongodb+srv://Virajpet:<db_password>@game.nchke5i.mongodb.net/?retryWrites=true&w=majority&appName=Game",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
+        "mongodb+srv://Virajpet:<db_password>@game.nchke5i.mongodb.net/?retryWrites=true&w=majority&appName=Game"
     );
     console.log("MongoDB connected successfully");
   } catch (error) {
@@ -386,9 +393,13 @@ app.use((req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Health check: http://localhost:${PORT}/api/health`);
+      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(
+        `MongoDB URI configured: ${process.env.MONGODB_URI ? "Yes" : "No"}`
+      );
     });
   } catch (error) {
     console.error("Failed to start server:", error);
